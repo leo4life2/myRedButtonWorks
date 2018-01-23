@@ -568,9 +568,10 @@ public class Player {
 //                            System.out.println("The Ranger is in!");
                             //look for nearest enemy and attack while kiting
                             VecUnit nearbyEnemies = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 70, enemyTeam);
-                            ArrayList<Unit> nearbyEnemiesAsArrayList = vecUnittoArrayList(nearbyEnemies);
-                            if (nearbyEnemiesAsArrayList.size() != 0){
-                                Unit nearestEnemy = getNearestEnemy(unit, nearbyEnemies);
+                            if (nearbyEnemies.size() != 0){
+                                //can see enemies in range
+
+                                Unit nearestEnemy = nearbyEnemies.get(0);
                                 //set nearest enemy to current common target
                                 gc.writeTeamArray(98,nearestEnemy.location().mapLocation().getX());
                                 gc.writeTeamArray(99,nearestEnemy.location().mapLocation().getY());
@@ -579,8 +580,10 @@ public class Player {
                                 Direction dirOppositeOfEnemy = getDirAwayFromTargetMapLocNaive(unit.location().mapLocation(), nearestEnemy.location().mapLocation());
 
                                 if (gc.isAttackReady(uid) && gc.canAttack(uid, nearestEnemy.id())){
+                                    //attack if can
                                     gc.attack(uid, nearestEnemy.id());
                                 }else if(gc.isMoveReady(uid)){
+                                    //kiting
                                     if (getDistanceTo(unit, nearestEnemy) > 10 && gc.canMove(uid, dirToEnemy)) {
                                         gc.moveRobot(uid, dirToEnemy);
                                     } else if (getDistanceTo(unit, nearestEnemy) < 10 && gc.canMove(uid, dirOppositeOfEnemy)) {
@@ -597,7 +600,7 @@ public class Player {
                                 }
                             }else if(gc.planet() == Planet.Mars && teamArray.get(98) != 0 && teamArray.get(99) != 0){
                                 //mars
-                                MapLocation commonTargetLocation = new MapLocation(Planet.Earth,teamArray.get(98),teamArray.get(99));
+                                MapLocation commonTargetLocation = new MapLocation(Planet.Mars,teamArray.get(98),teamArray.get(99));
                                 Direction dirToTargetLoc = getDirToTargetMapLocNaive(unit.location().mapLocation(),commonTargetLocation);
                                 if (gc.canMove(uid,dirToTargetLoc)){
                                     gc.moveRobot(uid,dirToTargetLoc);
@@ -616,10 +619,19 @@ public class Player {
                                                 gc.moveRobot(uid, dir);
                                             }else{
                                                 // if it is already away from home factory or it's stuck for some reason, let it move randomly.
-                                                for (Direction d : directions){
-                                                    if(gc.canMove(uid, d))
-                                                        gc.moveRobot(uid, d);
+                                                for (Direction randDir : directions){
+                                                    if(gc.canMove(uid, randDir)) {
+                                                        gc.moveRobot(uid, randDir);
+                                                        break;
+                                                    }
                                                 }
+                                            }
+                                        }
+                                    }else{
+                                        for (Direction randDir : directions){
+                                            if(gc.canMove(uid, randDir)) {
+                                                gc.moveRobot(uid, randDir);
+                                                break;
                                             }
                                         }
                                     }
@@ -637,31 +649,31 @@ public class Player {
                     case Knight:{
                         try{
 //                        System.out.println("The Knight is in!");
-                            VecUnit factoriesInVec = gc.senseNearbyUnitsByType(unit.location().mapLocation(), 50, UnitType.Factory);
-                            ArrayList<Unit> factories = vecUnittoArrayList(factoriesInVec);
-                            while(factories.size()!=0){
-                                Unit attackGoal = getNearestEnemyFactory(unit, factories);
-                                if(attackGoal.team()==myteam){
-                                    factories.remove(0);
-                                    continue;
-                                }
-                                if(noGuardAroundFactory(gc, attackGoal)){
-                                    Direction dir = getDirToTargetMapLocNaive(unit.location().mapLocation(), attackGoal.location().mapLocation());
-                                    if(gc.isMoveReady(uid) && gc.canMove(uid, dir))
-                                        gc.moveRobot(uid, dir);
-                                    if(gc.isAttackReady(uid) && gc.canAttack(uid, attackGoal.id())){
-                                        System.out.println("Knight: attacking");
-                                        gc.attack(uid, attackGoal.id());
-                                    }
-                                    break;
-                                }else{
-                                    int channelNum = findAChannel( gc, 5);//5 is the number for factories
-                                    if(channelNum!=-1) {
-                                        gc.writeTeamArray(channelNum, factories.get(0).id());
-                                    }
-                                    factories.remove(0);
-                                }
-                            }
+//                            VecUnit factoriesInVec = gc.senseNearbyUnitsByType(unit.location().mapLocation(), 50, UnitType.Factory);
+//                            ArrayList<Unit> factories = vecUnittoArrayList(factoriesInVec);
+//                            while(factories.size()!=0){
+//                                Unit attackGoal = getNearestEnemyFactory(unit, factories);
+//                                if(attackGoal.team()==myteam){
+//                                    factories.remove(0);
+//                                    continue;
+//                                }
+//                                if(noGuardAroundFactory(gc, attackGoal)){
+//                                    Direction dir = getDirToTargetMapLocNaive(unit.location().mapLocation(), attackGoal.location().mapLocation());
+//                                    if(gc.isMoveReady(uid) && gc.canMove(uid, dir))
+//                                        gc.moveRobot(uid, dir);
+//                                    if(gc.isAttackReady(uid) && gc.canAttack(uid, attackGoal.id())){
+//                                        System.out.println("Knight: attacking");
+//                                        gc.attack(uid, attackGoal.id());
+//                                    }
+//                                    break;
+//                                }else{
+//                                    int channelNum = findAChannel( gc, 5);//5 is the number for factories
+//                                    if(channelNum!=-1) {
+//                                        gc.writeTeamArray(channelNum, factories.get(0).id());
+//                                    }
+//                                    factories.remove(0);
+//                                }
+//                            }
                             // if there's no factories to meddle with, find some worker to meddle with
                             if(gc.isAttackReady(uid)||gc.isMoveReady(uid)){
                                 VecUnit enemy = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 50, enemyTeam);
@@ -676,7 +688,7 @@ public class Player {
                                             Direction d = getDirToTargetMapLocNaive(unit.location().mapLocation(), eneBot.location().mapLocation());
                                             if (gc.isMoveReady(uid) && gc.canMove(uid, d) && getDistanceTo(unit, eneBot) > 2)
                                                 gc.moveRobot(uid, d);
-                                            if (gc.isAttackReady(uid) && gc.canAttack(uid, eneBot.id()))
+                                            else if (gc.isAttackReady(uid) && gc.canAttack(uid, eneBot.id()))
                                                 gc.attack(uid, eneBot.id());
                                             break;
                                         }
@@ -684,7 +696,7 @@ public class Player {
                                             Direction d = getDirToTargetMapLocNaive(unit.location().mapLocation(), eneBot.location().mapLocation());
                                             if (gc.isMoveReady(uid) && gc.canMove(uid, d) && getDistanceTo(unit, eneBot) > 2)
                                                 gc.moveRobot(uid, d);
-                                            if (gc.isAttackReady(uid) && gc.canAttack(uid, eneBot.id()))
+                                            else if (gc.isAttackReady(uid) && gc.canAttack(uid, eneBot.id()))
                                                 gc.attack(uid, eneBot.id());
                                             break;
                                         }
@@ -723,7 +735,7 @@ public class Player {
                                     }
                                 }else if(gc.planet() == Planet.Mars && teamArray.get(98) != 0 && teamArray.get(99) != 0){
                                     //mars
-                                    MapLocation commonTargetLocation = new MapLocation(Planet.Earth,teamArray.get(98),teamArray.get(99));
+                                    MapLocation commonTargetLocation = new MapLocation(Planet.Mars,teamArray.get(98),teamArray.get(99));
                                     Direction dirToTargetLoc = getDirToTargetMapLocNaive(unit.location().mapLocation(),commonTargetLocation);
                                     if (gc.canMove(uid,dirToTargetLoc)){
                                         gc.moveRobot(uid,dirToTargetLoc);
@@ -744,7 +756,15 @@ public class Player {
                                                     for (Direction d : directions){
                                                         if(gc.canMove(uid, d))
                                                             gc.moveRobot(uid, d);
+                                                            break;
                                                     }
+                                                }
+                                            }
+                                        }else{
+                                            for (Direction randDir : directions){
+                                                if(gc.canMove(uid, randDir)) {
+                                                    gc.moveRobot(uid, randDir);
+                                                    break;
                                                 }
                                             }
                                         }
@@ -789,7 +809,7 @@ public class Player {
                                 }
                             }else if(gc.planet() == Planet.Mars && teamArray.get(98) != 0 && teamArray.get(99) != 0){
                                 //mars
-                                MapLocation commonTargetLocation = new MapLocation(Planet.Earth,teamArray.get(98),teamArray.get(99));
+                                MapLocation commonTargetLocation = new MapLocation(Planet.Mars,teamArray.get(98),teamArray.get(99));
                                 Direction dirToTargetLoc = getDirToTargetMapLocNaive(unit.location().mapLocation(),commonTargetLocation);
                                 if (gc.canMove(uid,dirToTargetLoc)){
                                     gc.moveRobot(uid,dirToTargetLoc);
@@ -810,7 +830,15 @@ public class Player {
                                                 for (Direction d : directions){
                                                     if(gc.canMove(uid, d))
                                                         gc.moveRobot(uid, d);
+                                                        break;
                                                 }
+                                            }
+                                        }
+                                    }else{
+                                        for (Direction randDir : directions){
+                                            if(gc.canMove(uid, randDir)) {
+                                                gc.moveRobot(uid, randDir);
+                                                break;
                                             }
                                         }
                                     }
