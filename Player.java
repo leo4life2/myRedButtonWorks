@@ -140,6 +140,12 @@ public class Player {
         return true;
     }
 
+        /* about team array
+           0-29: enemy factory    //knight can take care if the factory isn't surrounded by enemies
+           30-79: enemy ranger >:O  //mage should take care of this as long as they have a healer helper
+           80-99: healer enemy     //knight will kill the healer
+        */
+
     public static int findAChannel(GameController gc, int type){
         Veci32 teamArray = gc.getTeamArray(gc.planet());
         switch (type){
@@ -191,14 +197,10 @@ public class Player {
         // This will eventually be fixed :/
         System.out.println("Opposite of " + Direction.North + ": " + bc.bcDirectionOpposite(Direction.North));
 
-        /* about team array
-            0-29: enemy factory    //knight can take care if the factory isn't surrounded by enemies
-            30-79: enemy ranger >:O  //mage should take care of this as long as they have a healer helper
-            80-99: healer enemy     //knight will kill the healer
-         */
-
         // Connect to the manager, starting the game
         GameController gc = new GameController();
+        GameMap gameMap = new GameMap();
+        AsteroidPattern asteroidPattern = gameMap.getAsteroids();
         Team myteam = gc.team();
         Team enemyTeam;
         if (myteam==Team.Blue){
@@ -209,6 +211,8 @@ public class Player {
 
         // Direction is a normal java enum.
         Direction[] directions = Direction.values();
+
+        System.out.println("asteroid pattern = " + asteroidPattern.toJson());
 
 
         // get map
@@ -221,8 +225,6 @@ public class Player {
         int marsMapWidth = (int)(MarsMap.getWidth());
         int earthMapArea = earthMapHeight*earthMapWidth;
         int marsMapArea = marsMapHeight*marsMapWidth;
-        if (earthMapHeight!=marsMapHeight)
-            System.out.println("Earth and Mars maps have different size!!");
 
         gc.queueResearch(UnitType.Rocket);
         gc.queueResearch(UnitType.Worker);
@@ -512,22 +514,60 @@ public class Player {
                                 }
                             }
                             else{
-                                VecUnit nearbyFriendliesInVec = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),3,myteam);
+                                VecUnit nearbyFriendliesInVec = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),2,myteam);
                                 VecUnitID garrisonRobotIDs = unit.structureGarrison();
                                 Unit[] nearbyFriendlies = vecUnittoArray(nearbyFriendliesInVec);
 
                                 //Loading soldiers
                                 for (Unit friendly : nearbyFriendlies){
-                                    if (gc.canLoad(uid,friendly.id()) && friendly.unitType() != UnitType.Worker){
-                                        gc.load(uid,friendly.id());
+                                    int workerCount = 0;
+                                    int mageCount = 0;
+                                    int healerCount = 0;
+                                    int knightCount = 0;
+                                    int rangerCount = 0;
+                                    switch (friendly.unitType()){
+                                        case Worker:
+                                            if (gc.canLoad(uid,friendly.id()) && workerCount <= 3){
+                                                gc.load(uid,friendly.id());
+                                                workerCount++;
+                                            }
+                                            break;
+                                        case Mage:
+                                            if (gc.canLoad(uid,friendly.id()) && mageCount <= 1){
+                                                gc.load(uid,friendly.id());
+                                                mageCount++;
+                                            }
+                                            break;
+                                        case Healer:
+                                            if (gc.canLoad(uid,friendly.id()) && healerCount <= 1){
+                                                gc.load(uid,friendly.id());
+                                                healerCount++;
+                                            }
+                                            break;
+                                        case Knight:
+                                            if (gc.canLoad(uid,friendly.id()) && knightCount <= 2){
+                                                gc.load(uid,friendly.id());
+                                                knightCount++;
+                                            }
+                                            break;
+                                        case Ranger:
+                                            if (gc.canLoad(uid,friendly.id()) && rangerCount <= 1){
+                                                gc.load(uid,friendly.id());
+                                                rangerCount++;
+                                            }
+                                            break;
+                                        default:
+                                            break;
                                     }
                                 }
 
                                 MapLocation marsLoc = getRandomMarsLocation(marsMapHeight, marsMapWidth);
-                                if (gc.canLaunchRocket(uid, marsLoc)) {
+                                if (gc.canLaunchRocket(uid, marsLoc) && garrisonRobotIDs.size() > 3) { //check rocket is not empty before launching
                                     System.out.println("Rocket is launched");
                                     gc.launchRocket(uid, marsLoc);
                                     // teammates near the rocket should be informed and should run away before the rocket launches.
+                                }else if (garrisonRobotIDs.size() < 3){
+                                    //broadcast message to get robots board rocket
                                 }
                             }
                         }catch(Exception e){
