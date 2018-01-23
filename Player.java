@@ -618,22 +618,25 @@ public class Player {
                                             if(gc.canMove(uid, dir)){
                                                 gc.moveRobot(uid, dir);
                                             }else{
-                                                // if it is already away from home factory or it's stuck for some reason, let it move randomly.
-                                                for (Direction randDir : directions){
-                                                    if(gc.canMove(uid, randDir)) {
-                                                        gc.moveRobot(uid, randDir);
+                                                //loop random directions until finds one that works
+                                                Direction randomDir = getRandomDirection();
+                                                while (true){
+                                                    if (gc.canMove(uid,randomDir))
                                                         break;
-                                                    }
+                                                    randomDir = getRandomDirection();
                                                 }
+                                                gc.moveRobot(uid,randomDir);
                                             }
                                         }
                                     }else{
-                                        for (Direction randDir : directions){
-                                            if(gc.canMove(uid, randDir)) {
-                                                gc.moveRobot(uid, randDir);
+                                        //loop random directions until finds one that works
+                                        Direction randomDir = getRandomDirection();
+                                        while (true){
+                                            if (gc.canMove(uid,randomDir))
                                                 break;
-                                            }
+                                            randomDir = getRandomDirection();
                                         }
+                                        gc.moveRobot(uid,randomDir);
                                     }
                                 }
                             }
@@ -752,21 +755,25 @@ public class Player {
                                                 if(gc.canMove(uid, dir)){
                                                     gc.moveRobot(uid, dir);
                                                 }else{
-                                                    // if it is already away from home factory or it's stuck for some reason, let it move randomly.
-                                                    for (Direction d : directions){
-                                                        if(gc.canMove(uid, d))
-                                                            gc.moveRobot(uid, d);
+                                                    //loop random directions until finds one that works
+                                                    Direction randomDir = getRandomDirection();
+                                                    while (true){
+                                                        if (gc.canMove(uid,randomDir))
                                                             break;
+                                                        randomDir = getRandomDirection();
                                                     }
+                                                    gc.moveRobot(uid,randomDir);
                                                 }
                                             }
                                         }else{
-                                            for (Direction randDir : directions){
-                                                if(gc.canMove(uid, randDir)) {
-                                                    gc.moveRobot(uid, randDir);
+                                            //loop random directions until finds one that works
+                                            Direction randomDir = getRandomDirection();
+                                            while (true){
+                                                if (gc.canMove(uid,randomDir))
                                                     break;
-                                                }
+                                                randomDir = getRandomDirection();
                                             }
+                                            gc.moveRobot(uid,randomDir);
                                         }
                                     }
                                 }
@@ -827,20 +834,25 @@ public class Player {
                                                 gc.moveRobot(uid, dir);
                                             }else{
                                                 // if it is already away from home factory or it's stuck for some reason, let it move randomly.
-                                                for (Direction d : directions){
-                                                    if(gc.canMove(uid, d))
-                                                        gc.moveRobot(uid, d);
+                                                //loop random directions until finds one that works
+                                                Direction randomDir = getRandomDirection();
+                                                while (true){
+                                                    if (gc.canMove(uid,randomDir))
                                                         break;
+                                                    randomDir = getRandomDirection();
                                                 }
+                                                gc.moveRobot(uid,randomDir);
                                             }
                                         }
                                     }else{
-                                        for (Direction randDir : directions){
-                                            if(gc.canMove(uid, randDir)) {
-                                                gc.moveRobot(uid, randDir);
+                                        //loop random directions until finds one that works
+                                        Direction randomDir = getRandomDirection();
+                                        while (true){
+                                            if (gc.canMove(uid,randomDir))
                                                 break;
-                                            }
+                                            randomDir = getRandomDirection();
                                         }
+                                        gc.moveRobot(uid,randomDir);
                                     }
                                 }
                             }
