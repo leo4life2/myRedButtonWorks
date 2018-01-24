@@ -489,7 +489,7 @@ public class Player {
                                 int[] garrison = vecUnitIDtoArray(garrisonInVec);
                                 for (int botID : garrison){
                                     for (Direction dir : directions){
-                                        if (gc.canUnload(uid,dir)){
+                                        if (gc.canUnload(uid,dir) && gc.isMoveReady(botID)){
                                             gc.unload(uid,dir);
                                         }
                                     }
@@ -509,31 +509,31 @@ public class Player {
                                     int rangerCount = 0;
                                     switch (friendly.unitType()){
                                         case Worker:
-                                            if (gc.canLoad(uid,friendly.id()) && workerCount <= 2){
+                                            if (gc.canLoad(uid,friendly.id()) && workerCount <= 2 && gc.isMoveReady(friendly.id())){
                                                 gc.load(uid,friendly.id());
                                                 workerCount++;
                                             }
                                             break;
                                         case Mage:
-                                            if (gc.canLoad(uid,friendly.id()) && mageCount <= 1){
+                                            if (gc.canLoad(uid,friendly.id()) && mageCount <= 1 && gc.isMoveReady(friendly.id())){
                                                 gc.load(uid,friendly.id());
                                                 mageCount++;
                                             }
                                             break;
                                         case Healer:
-                                            if (gc.canLoad(uid,friendly.id()) && healerCount <= 1){
+                                            if (gc.canLoad(uid,friendly.id()) && healerCount <= 1 && gc.isMoveReady(friendly.id())){
                                                 gc.load(uid,friendly.id());
                                                 healerCount++;
                                             }
                                             break;
                                         case Knight:
-                                            if (gc.canLoad(uid,friendly.id()) && knightCount <= 1){
+                                            if (gc.canLoad(uid,friendly.id()) && knightCount <= 1 && gc.isMoveReady(friendly.id())){
                                                 gc.load(uid,friendly.id());
                                                 knightCount++;
                                             }
                                             break;
                                         case Ranger:
-                                            if (gc.canLoad(uid,friendly.id()) && rangerCount <= 3){
+                                            if (gc.canLoad(uid,friendly.id()) && rangerCount <= 3 && gc.isMoveReady(friendly.id())){
                                                 gc.load(uid,friendly.id());
                                                 rangerCount++;
                                             }
