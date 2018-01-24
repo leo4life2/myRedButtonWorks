@@ -595,14 +595,14 @@ public class Player {
                                 // no enemies nearby and has a common target * on earth *
                                 MapLocation commonTargetLocation = new MapLocation(Planet.Earth,teamArray.get(98),teamArray.get(99));
                                 Direction dirToTargetLoc = getDirToTargetMapLocNaive(unit.location().mapLocation(),commonTargetLocation);
-                                if (gc.canMove(uid,dirToTargetLoc)){
+                                if (gc.isMoveReady(uid) && gc.canMove(uid,dirToTargetLoc)){
                                     gc.moveRobot(uid,dirToTargetLoc);
                                 }
                             }else if(gc.planet() == Planet.Mars && teamArray.get(98) != 0 && teamArray.get(99) != 0){
                                 //mars
                                 MapLocation commonTargetLocation = new MapLocation(Planet.Mars,teamArray.get(98),teamArray.get(99));
                                 Direction dirToTargetLoc = getDirToTargetMapLocNaive(unit.location().mapLocation(),commonTargetLocation);
-                                if (gc.canMove(uid,dirToTargetLoc)){
+                                if (gc.isMoveReady(uid) && gc.canMove(uid,dirToTargetLoc)){
                                     gc.moveRobot(uid,dirToTargetLoc);
                                 }
 
