@@ -216,7 +216,7 @@ public class Player {
         // get map
         PlanetMap EarthMap = gc.startingMap(Planet.Earth);
         PlanetMap MarsMap = gc.startingMap(Planet.Mars);
-        // is Earth and Mars always in the same size?
+
         int earthMapHeight = (int)(EarthMap.getHeight());
         int earthMapWidth = (int)(EarthMap.getWidth());
         int marsMapHeight = (int)(MarsMap.getHeight());
@@ -250,6 +250,8 @@ public class Player {
 
 
         while (true) {
+            long start = System.currentTimeMillis();
+            long current = System.currentTimeMillis();
             // for each round
             int n_worker = 0;
             int n_factory = 0;
@@ -340,6 +342,7 @@ public class Player {
                                     break;
                                 }
                             }
+                            //System.gc();
 
                             // then build it
                             VecUnit nearbyUnits = gc.senseNearbyUnits(maploc, 2);
@@ -351,6 +354,8 @@ public class Player {
                                     break;
                                 }
                             }
+                            //System.gc();
+
 
                             // move around
                         /*
@@ -429,11 +434,18 @@ public class Player {
                                     break;
                                 }
                             }
+                            //System.gc();
                         }catch(Exception e){
                             System.out.println("Worker Exception");
                             e.printStackTrace();
                         }
-                        break;}
+//                        long t = System.currentTimeMillis();
+//                        if(t-current>=500){
+//                            current = t;
+//                            System.out.println("Worker report: "+(int)((current-start)));
+//                        }
+                        break;
+                    }
 
                     case Factory:{
                         try {
@@ -479,6 +491,11 @@ public class Player {
                             System.out.println("Factory Exception");
                             e.printStackTrace();
                         }
+//                        long t = System.currentTimeMillis();
+//                        if(t-current>=500){
+//                            current = t;
+//                            System.out.println("Factory report: "+(int)((current-start)));
+//                        }
                         break;}
 
                     case Rocket:{
@@ -542,6 +559,8 @@ public class Player {
                                             break;
                                     }
                                 }
+                                //System.gc();
+
 
                                 MapLocation marsLoc = getRandomMarsLocation(marsMapHeight, marsMapWidth);
                                 if (gc.canLaunchRocket(uid, marsLoc) && garrisonRobotIDs.size() > 3) { //check rocket is not empty before launching
@@ -554,12 +573,19 @@ public class Player {
                                              gc.load(uid,friendly.id());
                                         }
                                     }
+                                    //System.gc();
+
                                 }
                             }
                         }catch(Exception e){
                             System.out.println("Rocket Exception");
                             e.printStackTrace();
                         }
+//                        long t = System.currentTimeMillis();
+//                        if(t-current>=500){
+//                            current = t;
+//                            System.out.println("Rocket report: "+(int)((current-start)));
+//                        }
                         break;
                     }
 
@@ -620,23 +646,25 @@ public class Player {
                                             }else{
                                                 //loop random directions until finds one that works
                                                 Direction randomDir = getRandomDirection();
-                                                while (true){
-                                                    if (gc.canMove(uid,randomDir))
-                                                        break;
-                                                    randomDir = getRandomDirection();
+                                                for(int r=0; r<10; r++){
+                                                    if(gc.canMove(uid,randomDir)){
+                                                        gc.moveRobot(uid,randomDir);
+                                                        break;}
+                                                    else
+                                                        randomDir=getRandomDirection();
                                                 }
-                                                gc.moveRobot(uid,randomDir);
                                             }
                                         }
                                     }else{
                                         //loop random directions until finds one that works
                                         Direction randomDir = getRandomDirection();
-                                        while (true){
-                                            if (gc.canMove(uid,randomDir))
-                                                break;
-                                            randomDir = getRandomDirection();
+                                        for(int r=0; r<10; r++){
+                                            if(gc.canMove(uid,randomDir)){
+                                                gc.moveRobot(uid,randomDir);
+                                                break;}
+                                            else
+                                                randomDir=getRandomDirection();
                                         }
-                                        gc.moveRobot(uid,randomDir);
                                     }
                                 }
                             }
@@ -646,6 +674,11 @@ public class Player {
                             System.out.println("Ranger Exception");
                             e.printStackTrace();
                         }
+//                        long t = System.currentTimeMillis();
+//                        if(t-current>=500){
+//                            current = t;
+//                            System.out.println("Ranger report: "+(int)((current-start)));
+//                        }
                         break;
                     }
 
@@ -757,23 +790,27 @@ public class Player {
                                                 }else{
                                                     //loop random directions until finds one that works
                                                     Direction randomDir = getRandomDirection();
-                                                    while (true){
-                                                        if (gc.canMove(uid,randomDir))
-                                                            break;
-                                                        randomDir = getRandomDirection();
+                                                    for(int r=0; r<10; r++){
+                                                        if(gc.canMove(uid,randomDir)){
+                                                            gc.moveRobot(uid,randomDir);
+                                                            break;}
+                                                        else
+                                                            randomDir=getRandomDirection();
                                                     }
-                                                    gc.moveRobot(uid,randomDir);
+                                                    //System.gc();
                                                 }
                                             }
                                         }else{
                                             //loop random directions until finds one that works
                                             Direction randomDir = getRandomDirection();
-                                            while (true){
-                                                if (gc.canMove(uid,randomDir))
-                                                    break;
-                                                randomDir = getRandomDirection();
+                                            for(int r=0; r<10; r++){
+                                                if(gc.canMove(uid,randomDir)){
+                                                    gc.moveRobot(uid,randomDir);
+                                                    break;}
+                                                else
+                                                    randomDir=getRandomDirection();
                                             }
-                                            gc.moveRobot(uid,randomDir);
+                                            //System.gc();
                                         }
                                     }
                                 }
@@ -782,6 +819,11 @@ public class Player {
                             System.out.println("Knight Exception");
                             e.printStackTrace();
                         }
+//                        long t = System.currentTimeMillis();
+//                        if(t-current>=500){
+//                            current = t;
+//                            System.out.println("Knight report: "+(int)((current-start)));
+//                        }
                         break;}
 
                     case Healer:{
@@ -807,6 +849,7 @@ public class Player {
                                         }
                                     }
                                 }
+                                //System.gc();
                             }else if(gc.planet() == Planet.Earth && teamArray.get(98) != 0 && teamArray.get(99) != 0){
                                 // no enemies nearby and has a common target * on earth *
                                 MapLocation commonTargetLocation = new MapLocation(Planet.Earth,teamArray.get(98),teamArray.get(99));
@@ -836,23 +879,25 @@ public class Player {
                                                 // if it is already away from home factory or it's stuck for some reason, let it move randomly.
                                                 //loop random directions until finds one that works
                                                 Direction randomDir = getRandomDirection();
-                                                while (true){
-                                                    if (gc.canMove(uid,randomDir))
-                                                        break;
-                                                    randomDir = getRandomDirection();
+                                                for(int r=0; r<10; r++){
+                                                    if(gc.canMove(uid,randomDir)){
+                                                        gc.moveRobot(uid,randomDir);
+                                                        break;}
+                                                    else
+                                                        randomDir=getRandomDirection();
                                                 }
-                                                gc.moveRobot(uid,randomDir);
                                             }
                                         }
                                     }else{
                                         //loop random directions until finds one that works
                                         Direction randomDir = getRandomDirection();
-                                        while (true){
-                                            if (gc.canMove(uid,randomDir))
-                                                break;
-                                            randomDir = getRandomDirection();
+                                        for(int r=0; r<10; r++){
+                                            if(gc.canMove(uid,randomDir)){
+                                                gc.moveRobot(uid,randomDir);
+                                                break;}
+                                            else
+                                                randomDir=getRandomDirection();
                                         }
-                                        gc.moveRobot(uid,randomDir);
                                     }
                                 }
                             }
@@ -863,6 +908,11 @@ public class Player {
                             e.printStackTrace();
 
                         }
+//                        long t = System.currentTimeMillis();
+//                        if(t-current>=500){
+//                            current = t;
+//                            System.out.println("Healer report: "+(int)((current-start)));
+//                        }
                         break;
                     }
 
@@ -912,11 +962,17 @@ public class Player {
                             System.out.println("Mage Exception");
                             e.printStackTrace();
                         }
+//                        long t = System.currentTimeMillis();
+//                        if(t-current>=500){
+//                            current = t;
+//                            System.out.println("Healer report: "+(int)((current-start)));
+//                        }
                         break;
                     }
 
                 }
             }
+            //System.gc();
             // Submit the actions we've done, and wait for our next turn.
             gc.nextTurn();
         }
