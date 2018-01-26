@@ -453,20 +453,13 @@ public class Player {
         gc.queueResearch(UnitType.Rocket);
         gc.queueResearch(UnitType.Worker);
         gc.queueResearch(UnitType.Ranger);
-        gc.queueResearch(UnitType.Knight);
         gc.queueResearch(UnitType.Rocket);
-//        gc.queueResearch(UnitType.Mage);
         gc.queueResearch(UnitType.Ranger);
         gc.queueResearch(UnitType.Ranger);
         gc.queueResearch(UnitType.Healer);
         gc.queueResearch(UnitType.Rocket);
-//        gc.queueResearch(UnitType.Mage);
         gc.queueResearch(UnitType.Healer);
-        gc.queueResearch(UnitType.Knight);
-        gc.queueResearch(UnitType.Knight);
         gc.queueResearch(UnitType.Healer);
-//        gc.queueResearch(UnitType.Mage);
-//        gc.queueResearch(UnitType.Mage);
 
         int limit_factory = 6;
         int limit_rocket = 3;
@@ -799,18 +792,16 @@ public class Player {
                                 }else if (garrisonRobotIDs.size() < 3){
                                     System.out.println("current garrison size: " + garrisonRobotIDs.size());
                                     for (Unit friendly : nearbyFriendlies){
-                                        //load anything if not enough bots
                                         int workerCount = 0;
-
                                         if (gc.canLoad(uid,friendly.id()) && friendly.unitType() == UnitType.Worker && workerCount <= 2){
+                                            System.out.println("loaded worker");
                                              gc.load(uid,friendly.id());
                                              workerCount++;
                                         }else if(gc.canLoad(uid,friendly.id())){
+                                            System.out.println("loaded not worker guy");
                                             gc.load(uid,friendly.id());
                                         }
                                     }
-                                    //System.gc();
-
                                 }
                             }
                         }catch(Exception e){
@@ -838,38 +829,46 @@ public class Player {
                                 Direction dirToEnemy = getDirToTargetMapLocNaive(unit.location().mapLocation(), nearestEnemy.location().mapLocation());
                                 Direction dirOppositeOfEnemy = getDirAwayFromTargetMapLocNaive(unit.location().mapLocation(), nearestEnemy.location().mapLocation());
 
-                                if (gc.isAttackReady(uid) && gc.canAttack(uid, nearestEnemy.id())){
+                                if (gc.isAttackReady(uid)) {
                                     //attack if can
-                                    gc.attack(uid, nearestEnemy.id());
+                                    if (gc.canAttack(uid, nearestEnemy.id())) {
+                                        gc.attack(uid, nearestEnemy.id());
+                                    } else {
+                                        //not in range or too close
+                                        if (gc.isAttackReady(uid) && gc.isMoveReady(uid)) {
 
-                                }else if(gc.isMoveReady(uid)){
-                                    if (gc.isAttackReady(uid)){
-                                        //didnt attack yet
-                                        if (gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),10,myteam).size() < 3){
-                                            //too less people, wait in safe location
-                                            if (getDistanceTo(unit, nearestEnemy) > 25 && gc.canMove(uid, dirToEnemy)) {
-                                                gc.moveRobot(uid, dirToEnemy);
-                                            } else if (getDistanceTo(unit, nearestEnemy) < 25 && gc.canMove(uid, dirOppositeOfEnemy)) {
-                                                gc.moveRobot(uid, dirOppositeOfEnemy);
+                                            //didnt attack yet
+                                            if (gc.senseNearbyUnitsByTeam(unit.location().mapLocation(), 10, myteam).size() < 3) {
+                                                //too less people, wait in safe location
+                                                if (getDistanceTo(unit, nearestEnemy) > 25 && gc.canMove(uid, dirToEnemy)) {
+                                                    gc.moveRobot(uid, dirToEnemy);
+                                                } else if (getDistanceTo(unit, nearestEnemy) < 25 && gc.canMove(uid, dirOppositeOfEnemy)) {
+                                                    gc.moveRobot(uid, dirOppositeOfEnemy);
+                                                }
+                                            } else {
+                                                //enough people
+                                                if (getDistanceTo(unit, nearestEnemy) > 10 && gc.canMove(uid, dirToEnemy)) {
+                                                    gc.moveRobot(uid, dirToEnemy);
+                                                } else if (getDistanceTo(unit, nearestEnemy) < 10 && gc.canMove(uid, dirOppositeOfEnemy)) {
+                                                    gc.moveRobot(uid, dirOppositeOfEnemy);
+                                                }
                                             }
-                                        }else{
-                                            if (getDistanceTo(unit, nearestEnemy) > 10 && gc.canMove(uid, dirToEnemy)) {
-                                                gc.moveRobot(uid, dirToEnemy);
-                                                if (gc.isAttackReady(uid) && gc.canAttack(uid, nearestEnemy.id())){
-                                                    //attack if can
-                                                    gc.attack(uid, nearestEnemy.id());
-                                                }
-                                            } else if (getDistanceTo(unit, nearestEnemy) < 10 && gc.canMove(uid, dirOppositeOfEnemy)) {
-                                                gc.moveRobot(uid, dirOppositeOfEnemy);
-                                                if (gc.isAttackReady(uid) && gc.canAttack(uid, nearestEnemy.id())){
-                                                    //attack if can
-                                                    gc.attack(uid, nearestEnemy.id());
-                                                }
+
+                                            if (gc.canAttack(uid, nearestEnemy.id())) {
+                                                gc.attack(uid, nearestEnemy.id());
+                                            }
+
+                                        } else {
+                                            //attacked
+                                            Direction dirAwayOfEnemy = getDirAwayTargetMapLocGreedy(gc,unit,nearestEnemy.location().mapLocation());
+                                            if (gc.isMoveReady(uid) && gc.canMove(uid,dirAwayOfEnemy))
+                                                gc.moveRobot(uid,dirAwayOfEnemy);
+                                            //see if can snipe
+                                            if (gc.canBeginSnipe(uid,nearestEnemy.location().mapLocation()) && gc.isBeginSnipeReady(uid)){
+                                                System.out.println("sniped.");
+                                                gc.beginSnipe(uid,nearestEnemy.location().mapLocation());
                                             }
                                         }
-                                    }else{
-                                        //attacked already, run
-                                        gc.moveRobot(uid,dirOppositeOfEnemy);
                                     }
                                 }
 
@@ -893,6 +892,11 @@ public class Player {
                                 if (gc.isMoveReady(uid) && gc.canMove(uid,dirToTargetLoc)){
                                     gc.moveRobot(uid,dirToTargetLoc);
                                 }
+                                //see if can snipe
+                                if (gc.canBeginSnipe(uid,nearestEnemy.location().mapLocation()) && gc.isBeginSnipeReady(uid)){
+                                    gc.beginSnipe(uid,nearestEnemy.location().mapLocation());
+                                    System.out.println("sniped.");
+                                }
 
                             }else if(gc.planet() == Planet.Mars && allMarsEnemies.size()!=0){
 
@@ -903,6 +907,11 @@ public class Player {
 
                                 if (gc.isMoveReady(uid) && gc.canMove(uid,dirToTargetLoc)){
                                     gc.moveRobot(uid,dirToTargetLoc);
+                                }
+                                //see if can snipe
+                                if (gc.canBeginSnipe(uid,nearestEnemy.location().mapLocation()) && gc.isBeginSnipeReady(uid)){
+                                    gc.beginSnipe(uid,nearestEnemy.location().mapLocation());
+                                    System.out.println("sniped.");
                                 }
 
                             }else{
