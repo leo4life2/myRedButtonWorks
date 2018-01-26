@@ -586,7 +586,7 @@ public class Player {
                                             building = true;
                                         }
                                     } else {
-                                        Direction dir = getDirAwayTargetMapLocGreedy(gc, unit, rocketablePos);
+                                        Direction dir = getDirToTargetMapLocGreedy(gc, unit, rocketablePos);
                                         if (gc.isMoveReady(uid) && gc.canMove(uid, dir)) {
                                             gc.moveRobot(uid, dir);
                                         }
