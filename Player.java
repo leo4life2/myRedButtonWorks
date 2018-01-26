@@ -43,6 +43,53 @@ public class Player {
         return targetLoc.directionTo(ourloc);
     }
 
+    public static Direction getDirToTargetMapLocGreedy(GameController gc, Unit ourUnit, MapLocation targetLoc) {
+        // the unit will try to move greedily to a direction approximately towards the target location.
+        Direction dirToTarget = ourUnit.location().mapLocation().directionTo(targetLoc);
+        if (dirToTarget == Direction.Center) {
+            return dirToTarget;
+        }
+        int dirIndex = dirToTarget.swigValue();
+        for (int i = 0; i < 4; i++) {
+            int newDirIndex = (dirIndex += (i+8)) % 8;
+            Direction newDirection = Direction.swigToEnum(newDirIndex);
+            if (gc.canMove(ourUnit.id(), newDirection)) {
+                return newDirection;
+            }
+
+            newDirIndex = (dirIndex -= (i+8)) % 8;
+            newDirection = Direction.swigToEnum(newDirIndex);
+            if (gc.canMove(ourUnit.id(), newDirection)) {
+                return newDirection;
+            }
+        }
+        return Direction.Center;
+    }
+
+
+    public static Direction getDirAwayTargetMapLocGreedy(GameController gc, Unit ourUnit, MapLocation targetLoc) {
+        // the unit will try to move greedily to a direction approximately towards the target location.
+        Direction dirToTarget = targetLoc.directionTo(ourUnit.location().mapLocation());
+        if (dirToTarget == Direction.Center) {
+            return dirToTarget;
+        }
+        int dirIndex = dirToTarget.swigValue();
+        for (int i = 0; i < 4; i++) {
+            int newDirIndex = (dirIndex += (i+8)) % 8;
+            Direction newDirection = Direction.swigToEnum(newDirIndex);
+            if (gc.canMove(ourUnit.id(), newDirection)) {
+                return newDirection;
+            }
+
+            newDirIndex = (dirIndex -= (i+8)) % 8;
+            newDirection = Direction.swigToEnum(newDirIndex);
+            if (gc.canMove(ourUnit.id(), newDirection)) {
+                return newDirection;
+            }
+        }
+        return Direction.Center;
+    }
+
     // gc can't be used in helper functions, which is stupid
     /*
     public static boolean distantFromOtherFactory(Unit unit){
@@ -81,6 +128,82 @@ public class Player {
         }
 
         return tempNearest;
+    }
+
+    public static MapLocation getNearestFactoriablePos(GameController gc, Unit me){
+        MapLocation myLocation = me.location().mapLocation();
+        Planet myPlanet = myLocation.getPlanet();
+        if(myPlanet==Planet.Mars){
+//            System.out.println("You're on the mars.");
+            return null;// you can never build a factory on Mars.
+        }
+        int workerExploreDis = 5;
+        int uid = me.id();
+        int meX = myLocation.getX();
+        int meY = myLocation.getY();
+        for(int dx=0; dx<=workerExploreDis; dx++){
+            for(int dy=0; dy<=workerExploreDis; dy++){
+                for(int dirX=-1; dirX<=1; dirX+=2){
+                    for(int dirY=-1; dirY<=1; dirY+=2){
+                        if(dx!=0||dy!=0) {//it's goal should not be itself lol
+                            MapLocation goal = new MapLocation(Planet.Earth, meX + dx * dirX, meY + dy * dirY);
+//                          System.out.println(goal.getX()+", "+goal.getY());
+                            if (isFactoriable(gc, goal))
+                                return goal;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean isFactoriable(GameController gc, MapLocation goal){
+        int factorySafetyDis = 3;
+        VecUnit nearbyFactories = gc.senseNearbyUnitsByType(goal, factorySafetyDis, UnitType.Factory);
+        for(int i=0; i<nearbyFactories.size(); i++){
+            if(nearbyFactories.get(i).team()==gc.team())
+                return false;
+        }
+        return true;
+    }
+
+    public static MapLocation getNearestRocketablePos(GameController gc, Unit me){
+        MapLocation myLocation = me.location().mapLocation();
+        Planet myPlanet = myLocation.getPlanet();
+        if(myPlanet==Planet.Mars){
+//            System.out.println("You're on the mars.");
+            return null;// you can never build a factory on Mars.
+        }
+        int workerExploreDis = 5;
+        int uid = me.id();
+        int meX = myLocation.getX();
+        int meY = myLocation.getY();
+        for(int dx=0; dx<=workerExploreDis; dx++){
+            for(int dy=0; dy<=workerExploreDis; dy++){
+                for(int dirX=-1; dirX<=1; dirX+=2){
+                    for(int dirY=-1; dirY<=1; dirY+=2){
+                        if(dx!=0||dy!=0) {//it's goal should not be itself lol
+                            MapLocation goal = new MapLocation(Planet.Earth, meX + dx * dirX, meY + dy * dirY);
+//                          System.out.println(goal.getX()+", "+goal.getY());
+                            if (isRocketable(gc, goal))
+                                return goal;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean isRocketable(GameController gc, MapLocation goal){
+        int factorySafetyDis = 3;
+        VecUnit nearbyFactories = gc.senseNearbyUnitsByType(goal, factorySafetyDis, UnitType.Rocket);
+        for(int i=0; i<nearbyFactories.size(); i++){
+            if(nearbyFactories.get(i).team()==gc.team())
+                return false;
+        }
+        return true;
     }
 
     public static Unit getNearestEnemyFactory(Unit me, VecUnit factories){
@@ -229,24 +352,24 @@ public class Player {
         gc.queueResearch(UnitType.Ranger);
         gc.queueResearch(UnitType.Knight);
         gc.queueResearch(UnitType.Rocket);
-        gc.queueResearch(UnitType.Mage);
+//        gc.queueResearch(UnitType.Mage);
         gc.queueResearch(UnitType.Ranger);
         gc.queueResearch(UnitType.Ranger);
         gc.queueResearch(UnitType.Healer);
         gc.queueResearch(UnitType.Rocket);
-        gc.queueResearch(UnitType.Mage);
+//        gc.queueResearch(UnitType.Mage);
         gc.queueResearch(UnitType.Healer);
         gc.queueResearch(UnitType.Knight);
         gc.queueResearch(UnitType.Knight);
         gc.queueResearch(UnitType.Healer);
-        gc.queueResearch(UnitType.Mage);
-        gc.queueResearch(UnitType.Mage);
+//        gc.queueResearch(UnitType.Mage);
+//        gc.queueResearch(UnitType.Mage);
 
-        int limit_factory = 3;//(int)(0.05f*marsMapArea);
+        int limit_factory = (int)(0.05f*marsMapArea);
         int limit_rocket = 3;
-        int limit_worker = 5;//(int)(0.01f*earthMapArea);
-        int limit_knight = 4;//(int)(0.02f*earthMapArea);
-        int limit_ranger = 13;//(int)(0.04f*earthMapArea);
+        int limit_worker = (int)(0.01f*earthMapArea);
+        int limit_knight = (int)(0.02f*earthMapArea);
+        int limit_ranger = (int)(0.04f*earthMapArea);
 
 
         while (true) {
@@ -304,10 +427,13 @@ public class Player {
                 switch(unit.unitType()){
                     case Worker:{
                         try {
+                            System.out.println("The Worker is in!");
                             //current status
                             boolean retreating = false; //running away from an enemy knight
                             boolean leavingHome = false; //running away from our factory
                             boolean building = false; //building or blueprinting
+
+                            MapLocation myLocation = unit.location().mapLocation();
 
                             if (n_worker <= limit_worker) {//self-reproduction
                                 for (int j = 0; j < directions.length; j++) {
@@ -319,32 +445,7 @@ public class Player {
                                 }
                             }
 
-                            // build rockets!
-                            if(n_rocket<=limit_rocket && gc.researchInfo().getLevel(UnitType.Rocket)>=1 && nearbyTeammates.size() >= 5){
-                                for (Direction d : directions) {
-                                    if (gc.canBlueprint(uid, UnitType.Rocket, d)) {
-                                        gc.blueprint(uid, UnitType.Rocket, d);
-                                        building = true;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            // build factories
-                            // first, blueprint the factory
-
-                            // will blueprint add numbers to n_factory? if not, it'd better broadcast the news to the team
-                            for (int j = 0; j < directions.length; j++) {
-                                Direction d = directions[j];
-                                if (n_factory <= limit_factory && karbonite >= 100 && gc.canBlueprint(uid, UnitType.Factory, d)) {
-                                    gc.blueprint(uid, UnitType.Factory, d);
-                                    building = true;
-                                    break;
-                                }
-                            }
-                            //System.gc();
-
-                            // then build it
+                            // build nearby buildable structures
                             VecUnit nearbyUnits = gc.senseNearbyUnits(maploc, 2);
                             for (int j = 0; j < nearbyUnits.size(); j++) {
                                 Unit other = nearbyUnits.get(j);
@@ -356,6 +457,63 @@ public class Player {
                             }
                             //System.gc();
 
+                            // blueprint rockets!
+//                            if(n_rocket<=limit_rocket && gc.researchInfo().getLevel(UnitType.Rocket)>=1 && nearbyTeammates.size() >= 5){
+//                                for (Direction d : directions) {
+//                                    if (gc.canBlueprint(uid, UnitType.Rocket, d)) {
+//                                        gc.blueprint(uid, UnitType.Rocket, d);
+//                                        building = true;
+//                                        break;
+//                                    }
+//                                }
+//                            }
+
+                            // build factories
+                            // first, blueprint the factory
+                            // will blueprint add numbers to n_factory? if not, it'd better broadcast the news to the team
+
+                            if(n_factory<limit_factory) {
+                                MapLocation factoriablePos = getNearestFactoriablePos(gc, unit);
+//                                System.out.println("isfactoriable: "+ (factoriablePos!=null));
+                                if (factoriablePos != null) {
+//                                    System.out.println("goalPos:"+factoriablePos.getX()+", "+factoriablePos.getY());
+//                                    System.out.println("myPos:"+myLocation.getX()+", "+myLocation.getY());
+//                                    System.out.println(factoriablePos.distanceSquaredTo(myLocation));
+                                    if (factoriablePos.distanceSquaredTo(myLocation) < 2) {
+                                        Direction dir = getDirToTargetMapLocNaive(myLocation, factoriablePos);
+//                                        System.out.println(dir);
+                                        if (gc.canBlueprint(uid, UnitType.Factory, dir)) {
+                                            gc.blueprint(uid, UnitType.Factory, dir);
+                                            building = true;
+                                        }
+                                    } else {
+                                        Direction dir = getDirAwayTargetMapLocGreedy(gc, unit, factoriablePos);
+                                        if (gc.isMoveReady(uid) && gc.canMove(uid, dir)) {
+                                            gc.moveRobot(uid, dir);
+                                        }
+                                    }
+                                }
+                            }
+                            //System.gc();
+
+                            if(n_rocket<limit_rocket) {
+                                MapLocation rocketablePos = getNearestRocketablePos(gc, unit);
+                                if (rocketablePos != null) {
+                                    if (rocketablePos.distanceSquaredTo(myLocation) < 2) {
+                                        Direction dir = getDirToTargetMapLocNaive(myLocation, rocketablePos);
+                                        System.out.println(dir);
+                                        if (gc.canBlueprint(uid, UnitType.Rocket, dir)) {
+                                            gc.blueprint(uid, UnitType.Rocket, dir);
+                                            building = true;
+                                        }
+                                    } else {
+                                        Direction dir = getDirAwayTargetMapLocGreedy(gc, unit, rocketablePos);
+                                        if (gc.isMoveReady(uid) && gc.canMove(uid, dir)) {
+                                            gc.moveRobot(uid, dir);
+                                        }
+                                    }
+                                }
+                            }
 
                             // move around
                         /*
@@ -459,34 +617,35 @@ public class Player {
                                 }
                             }
                             // produce knights if not enough
-                            if (n_knight < limit_knight) {
-                                if (gc.canProduceRobot(uid, UnitType.Knight)) {
-                                    gc.produceRobot(uid, UnitType.Knight);
+//                            if (n_knight < limit_knight) {
+//                                if (gc.canProduceRobot(uid, UnitType.Knight)) {
+//                                    gc.produceRobot(uid, UnitType.Knight);
+//                                }
+//                            } else if (n_ranger < limit_ranger){ //produce rangers if not enough
+//                                if (gc.canProduceRobot(uid, UnitType.Ranger)){
+//                                    gc.produceRobot(uid,UnitType.Ranger);
+//                                }
+//                            } else {// randomly produce knights, mages and rangers
+////                                if (Math.random()<0.14) {
+//////                                    System.out.print("Trying to produce Mage...");
+////                                    if (gc.canProduceRobot(uid, UnitType.Mage)) {
+////                                        gc.produceRobot(uid, UnitType.Mage);
+////                                    }
+////                                }else
+                            if(Math.random()<0.33 && gc.round() > 25){ //only make healers after round 25 to ensure there are combat robots already
+                                if (gc.canProduceRobot(uid, UnitType.Healer)){
+                                    gc.produceRobot(uid,UnitType.Healer);
                                 }
-                            } else if (n_ranger < limit_ranger){ //produce rangers if not enough
+//                            } else if (Math.random()>0.14 && Math.random()<0.28) {
+//                                if (gc.canProduceRobot(uid, UnitType.Knight)) {
+//                                    gc.produceRobot(uid, UnitType.Knight);
+//                                }
+                            } else {
                                 if (gc.canProduceRobot(uid, UnitType.Ranger)){
-                                    gc.produceRobot(uid,UnitType.Ranger);
-                                }
-                            } else {// randomly produce knights, mages and rangers
-                                if (Math.random()<0.16) {
-//                                    System.out.print("Trying to produce Mage...");
-                                    if (gc.canProduceRobot(uid, UnitType.Mage)) {
-                                        gc.produceRobot(uid, UnitType.Mage);
-                                    }
-                                }else if(Math.random()>0.16 && Math.random()<0.33 && gc.round() > 25){ //only make healers after round 25 to ensure there are combat robots already
-                                    if (gc.canProduceRobot(uid, UnitType.Healer)){
-                                        gc.produceRobot(uid,UnitType.Healer);
-                                    }
-                                } else if (Math.random()>0.33 && Math.random()<0.66) {
-                                    if (gc.canProduceRobot(uid, UnitType.Knight)) {
-                                        gc.produceRobot(uid, UnitType.Knight);
-                                    }
-                                } else {
-                                    if (gc.canProduceRobot(uid, UnitType.Ranger)){
-                                        gc.produceRobot(uid, UnitType.Ranger);
-                                    }
+                                    gc.produceRobot(uid, UnitType.Ranger);
                                 }
                             }
+
                         }catch(Exception e){
                             System.out.println("Factory Exception");
                             e.printStackTrace();
