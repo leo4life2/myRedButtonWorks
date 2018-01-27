@@ -202,8 +202,29 @@ public class Player {
         for(int i=0; i<nearbyFactories.size(); i++){
             if(nearbyFactories.get(i).team()==gc.team())
                 return false;
+            if(getGarrisonCapacity(gc, goal)<6){
+                return false;
+            }
+            if(gc.startingMap(gc.planet()).isPassableTerrainAt(goal)==0)
+                return false;
+            if(gc.hasUnitAtLocation(goal))
+                return false;
         }
         return true;
+    }
+
+    public static int getGarrisonCapacity(GameController gc, MapLocation loc){
+        PlanetMap planetMap = gc.startingMap(gc.planet());
+        Direction[] directions = Direction.values();
+        int capacity = 0;
+        for(int i=0; i<directions.length-1; i++){
+            MapLocation goal = loc.add(directions[i]);
+            if(planetMap.isPassableTerrainAt(goal)==1 &&
+                    !gc.hasUnitAtLocation(goal)){
+                capacity+=1;
+            }
+        }
+        return capacity;
     }
 
     public static MapLocation getNearestRocketablePos(GameController gc, Unit me){
@@ -236,7 +257,12 @@ public class Player {
 
     public static boolean isRocketable(GameController gc, MapLocation goal){
         int factorySafetyDis = 3;
-        VecUnit nearbyFactories = gc.senseNearbyUnitsByType(goal, factorySafetyDis, UnitType.Rocket);
+        VecUnit nearbyRockets = gc.senseNearbyUnitsByType(goal, factorySafetyDis, UnitType.Rocket);
+        VecUnit nearbyFactories = gc.senseNearbyUnitsByType(goal, 2, UnitType.Rocket);
+        for(int i=0; i<nearbyRockets.size(); i++){
+            if(nearbyRockets.get(i).team()==gc.team())
+                return false;
+        }
         for(int i=0; i<nearbyFactories.size(); i++){
             if(nearbyFactories.get(i).team()==gc.team())
                 return false;
