@@ -781,25 +781,30 @@ public class Player {
                                 }
                             }
                             else{
-                                VecUnit nearbyFriendliesInVec = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),2,myteam);
+                                VecUnit nearbyFriendliesInVec = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),5,myteam);
                                 VecUnitID garrisonRobotIDs = unit.structureGarrison();
-                                Unit[] nearbyFriendlies = vecUnittoArray(nearbyFriendliesInVec);
 
                                 MapLocation marsLoc = getRandomMarsLocation(marsMapHeight, marsMapWidth);
                                 if (gc.canLaunchRocket(uid, marsLoc) && garrisonRobotIDs.size() > 3) { //check rocket is not empty before launching
                                     gc.launchRocket(uid, marsLoc);
                                     // teammates near the rocket should be informed and should run away before the rocket launches.
-                                }else if (garrisonRobotIDs.size() < 3){
+                                }else if (garrisonRobotIDs.size() < 8){
                                     System.out.println("current garrison size: " + garrisonRobotIDs.size());
-                                    for (Unit friendly : nearbyFriendlies){
+                                    for (int x = 0; x < nearbyFriendliesInVec.size(); x++){
+                                        System.out.print("nearbyFriendlies size is" + nearbyFriendliesInVec.size());
+                                        Unit friendly = nearbyFriendliesInVec.get(x);
                                         int workerCount = 0;
                                         if (gc.canLoad(uid,friendly.id()) && friendly.unitType() == UnitType.Worker && workerCount <= 2){
                                             System.out.println("loaded worker");
-                                             gc.load(uid,friendly.id());
-                                             workerCount++;
+                                            gc.load(uid,friendly.id());
+                                            workerCount++;
+                                            break;
                                         }else if(gc.canLoad(uid,friendly.id())){
                                             System.out.println("loaded not worker guy");
                                             gc.load(uid,friendly.id());
+                                            break;
+                                        }else{
+                                            break;
                                         }
                                     }
                                 }
@@ -872,16 +877,6 @@ public class Player {
                                     }
                                 }
 
-                            }else if(allFriendlyRockets.size() != 0 && gc.planet() != Planet.Mars){
-
-                                Unit nearestRocket = getNearestFriendlyRocket(unit,allFriendlyRockets);
-
-                                Direction dirToRocket = getDirToTargetMapLocGreedy(gc,unit,nearestRocket.location().mapLocation());
-
-                                if (gc.isMoveReady(uid) && gc.canMove(uid,dirToRocket) && getDistanceTo(unit,nearestRocket) != 1){
-                                    gc.moveRobot(uid,dirToRocket);
-                                }
-
                             }else if(gc.planet() == Planet.Earth && allEarthEnemies.size()!=0){
 
                                 // no enemies nearby, go for a scanned enemy
@@ -912,6 +907,16 @@ public class Player {
                                 if (gc.canBeginSnipe(uid,nearestEnemy.location().mapLocation()) && gc.isBeginSnipeReady(uid)){
                                     gc.beginSnipe(uid,nearestEnemy.location().mapLocation());
                                     System.out.println("sniped.");
+                                }
+
+                            }else if(allFriendlyRockets.size() != 0 && gc.planet() != Planet.Mars){
+
+                                Unit nearestRocket = getNearestFriendlyRocket(unit,allFriendlyRockets);
+
+                                Direction dirToRocket = getDirToTargetMapLocGreedy(gc,unit,nearestRocket.location().mapLocation());
+
+                                if (gc.isMoveReady(uid) && gc.canMove(uid,dirToRocket) && getDistanceTo(unit,nearestRocket) != 1){
+                                    gc.moveRobot(uid,dirToRocket);
                                 }
 
                             }else{
