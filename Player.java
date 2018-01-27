@@ -868,11 +868,6 @@ public class Player {
                                             Direction dirAwayOfEnemy = getDirAwayTargetMapLocGreedy(gc,unit,nearestEnemy.location().mapLocation());
                                             if (gc.isMoveReady(uid) && gc.canMove(uid,dirAwayOfEnemy))
                                                 gc.moveRobot(uid,dirAwayOfEnemy);
-                                            //see if can snipe
-                                            if (gc.canBeginSnipe(uid,nearestEnemy.location().mapLocation()) && gc.isBeginSnipeReady(uid)){
-                                                System.out.println("sniped.");
-                                                gc.beginSnipe(uid,nearestEnemy.location().mapLocation());
-                                            }
                                         }
                                     }
                                 }
@@ -884,13 +879,8 @@ public class Player {
 
                                 Direction dirToTargetLoc = getDirToTargetMapLocGreedy(gc,unit,nearestEnemy.location().mapLocation());
 
-                                if (gc.isMoveReady(uid) && gc.canMove(uid,dirToTargetLoc)){
-                                    gc.moveRobot(uid,dirToTargetLoc);
-                                }
-                                //see if can snipe
-                                if (gc.canBeginSnipe(uid,nearestEnemy.location().mapLocation()) && gc.isBeginSnipeReady(uid)){
-                                    gc.beginSnipe(uid,nearestEnemy.location().mapLocation());
-                                    System.out.println("sniped.");
+                                if (gc.isMoveReady(uid) && gc.canMove(uid,dirToTargetLoc)) {
+                                    gc.moveRobot(uid, dirToTargetLoc);
                                 }
 
                             }else if(gc.planet() == Planet.Mars && allMarsEnemies.size()!=0){
@@ -902,11 +892,6 @@ public class Player {
 
                                 if (gc.isMoveReady(uid) && gc.canMove(uid,dirToTargetLoc)){
                                     gc.moveRobot(uid,dirToTargetLoc);
-                                }
-                                //see if can snipe
-                                if (gc.canBeginSnipe(uid,nearestEnemy.location().mapLocation()) && gc.isBeginSnipeReady(uid)){
-                                    gc.beginSnipe(uid,nearestEnemy.location().mapLocation());
-                                    System.out.println("sniped.");
                                 }
 
                             }else if(allFriendlyRockets.size() != 0 && gc.planet() != Planet.Mars){
