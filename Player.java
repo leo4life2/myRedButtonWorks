@@ -781,7 +781,7 @@ public class Player {
                                 }
                             }
                             else{
-                                VecUnit nearbyFriendliesInVec = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),5,myteam);
+                                VecUnit nearbyFriendliesInVec = gc.senseNearbyUnitsByTeam(unit.location().mapLocation(),2,myteam);
                                 VecUnitID garrisonRobotIDs = unit.structureGarrison();
 
                                 MapLocation marsLoc = getRandomMarsLocation(marsMapHeight, marsMapWidth);
@@ -798,11 +798,11 @@ public class Player {
                                             System.out.println("loaded worker");
                                             gc.load(uid,friendly.id());
                                             workerCount++;
-                                            break;
+                                            continue;
                                         }else if(gc.canLoad(uid,friendly.id())){
                                             System.out.println("loaded not worker guy");
                                             gc.load(uid,friendly.id());
-                                            break;
+                                            continue;
                                         }else{
                                             break;
                                         }
